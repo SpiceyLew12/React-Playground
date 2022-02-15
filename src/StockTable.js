@@ -41,20 +41,22 @@ export default class StockTable extends React.Component {
         value: entry
       }));
 
-    return ReactDOM.createPortal(
-      <Col style={{ zIndex: "100" }} onClick={(e) => e.stopPropagation()}>
-        <Select
-          ref={ref}
-          placeholder={column.text}
-          isClearable
-          isMulti
-          options={options}
-          className="filter"
-          onChange={(event) => onFilter(event.map((entry) => entry.value))}
-        />
-      </Col>,
-      document.getElementById("filter-container")
-    );
+    return this.state.portalReady
+      ? ReactDOM.createPortal(
+          <Col style={{ zIndex: "100" }} onClick={(e) => e.stopPropagation()}>
+            <Select
+              ref={ref}
+              placeholder={column.text}
+              isClearable
+              isMulti
+              options={options}
+              className="filter"
+              onChange={(event) => onFilter(event.map((entry) => entry.value))}
+            />
+          </Col>,
+          document.getElementById("filter-container")
+        )
+      : null;
   };
 
   renderDropDown = ({ options, currSizePerPage, onSizePerPageChange }) => {
