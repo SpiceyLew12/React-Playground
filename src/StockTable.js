@@ -161,13 +161,11 @@ export default class StockTable extends React.Component {
           type: FILTER_TYPES.MULTISELECT
         }),
         filterRenderer: (onFilter, column) =>
-          this.state.filter
-            ? this.getCustomFilter(
-                onFilter,
-                column,
-                filteredData.length ? filteredData : this.props.products
-              )
-            : null,
+          this.getCustomFilter(
+            onFilter,
+            column,
+            filteredData.length ? filteredData : this.props.products
+          ),
         text: "Product Name"
       },
       {
@@ -177,13 +175,11 @@ export default class StockTable extends React.Component {
           type: FILTER_TYPES.MULTISELECT
         }),
         filterRenderer: (onFilter, column) =>
-          this.state.filter
-            ? this.getCustomFilter(
-                onFilter,
-                column,
-                filteredData.length ? filteredData : this.props.products
-              )
-            : null,
+          this.getCustomFilter(
+            onFilter,
+            column,
+            filteredData.length ? filteredData : this.props.products
+          ),
         text: "Company"
       },
       {
@@ -194,13 +190,11 @@ export default class StockTable extends React.Component {
           comparator: Comparator.EQ
         }),
         filterRenderer: (onFilter, column) =>
-          this.state.filter
-            ? this.getCustomFilter(
-                onFilter,
-                column,
-                filteredData.length ? filteredData : this.props.products
-              )
-            : null,
+          this.getCustomFilter(
+            onFilter,
+            column,
+            filteredData.length ? filteredData : this.props.products
+          ),
         text: "Quantity"
       },
       {
@@ -210,13 +204,11 @@ export default class StockTable extends React.Component {
           type: FILTER_TYPES.MULTISELECT
         }),
         filterRenderer: (onFilter, column) =>
-          this.state.filter
-            ? this.getCustomFilter(
-                onFilter,
-                column,
-                filteredData.length ? filteredData : this.props.products
-              )
-            : null,
+          this.getCustomFilter(
+            onFilter,
+            column,
+            filteredData.length ? filteredData : this.props.products
+          ),
         text: "In Stock"
       }
     ];
@@ -235,23 +227,22 @@ export default class StockTable extends React.Component {
             </Button>
           </Col>
           <Col sm={{ span: 4, offset: 4 }} className="align-self-center">
-            {this.state.filter && (
-              <Button
-                className="btn btn-info text-white w-100 shadow-none"
-                onClick={() => {
-                  for (let key in refs) {
-                    refs[key].current.clearValue();
-                  }
-                }}
-              >
-                Clear Filter
-              </Button>
-            )}
+            <Button
+              hidden={!this.state.filter}
+              className="btn btn-info text-white w-100 shadow-none"
+              onClick={() => {
+                for (let key in refs) {
+                  refs[key].current.clearValue();
+                }
+              }}
+            >
+              Clear Filter
+            </Button>
           </Col>
         </Row>
         <legend />
 
-        <Row id="filter-container"></Row>
+        <Row hidden={!this.state.filter} id="filter-container"></Row>
         <legend />
         <BootstrapTable
           keyField="id"
