@@ -1,4 +1,5 @@
 import React from "react";
+import { Container } from "react-bootstrap";
 import StockTable from "./StockTable";
 
 const products = [];
