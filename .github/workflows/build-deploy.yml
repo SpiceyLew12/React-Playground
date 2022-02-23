@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install NPM packages
-      run: npm ci
+      run: npm install
     - name: Build and deploy to GH-Pages
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
