@@ -22,7 +22,13 @@ function addProducts(quantity) {
 addProducts(100);
 
 const App = () => {
-  return <StockTable products={products} />;
+  return (
+    <Container>
+      <h1 align="center">Bootstrap Table</h1>
+      <hr />
+      <StockTable products={products} />
+    </Container>
+  );
 };
 
 export default App;
