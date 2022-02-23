@@ -26,6 +26,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: git config --global user.email "Lewisunh@gmail.com"
-    - run: git config --global user.name "Joshua Lewis"
+    - run: git config --global user.name "SpicyLew12"
     - run: npm install
     - run: npm run deploy
