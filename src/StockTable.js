@@ -7,7 +7,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import BootstrapTable from "react-bootstrap-table-next";
 import Select from "react-select";
-import { Button, Col, Row } from "react-bootstrap";
+import { Button, ButtonGroup, Col, Row } from "react-bootstrap";
 import filterFactory, {
   Comparator,
   customFilter,
@@ -89,8 +89,8 @@ export default class StockTable extends React.Component {
     let size = currSizePerPage;
     let selectedSize = { label: size, value: size };
     return (
-      <Row style={{ marginLeft: "5px" }}>
-        <Col xs={4}>
+      <Row>
+        <Col md={4}>
           <Select
             isSearchable={false}
             value={selectedSize}
@@ -112,7 +112,7 @@ export default class StockTable extends React.Component {
           />
         </Col>
         <Col
-          xs={8}
+          md={8}
           ref={this.portal}
           className="justify-content-center align-self-center"
         ></Col>
@@ -129,6 +129,24 @@ export default class StockTable extends React.Component {
       firstPageText: "First",
       lastPageText: "Last",
       showTotal: true,
+      pageListRenderer: (options) => {
+        return (
+          <Col className="react-bootstrap-table-pagination-list" md={6}>
+            <ul className="pagination react-bootstrap-table-page-btns-ul float-end">
+              {options.pages.map((page) => (
+                <li
+                  className={`${page.active ? "active " : ""}page-item`}
+                  onClick={() => options.onPageChange(page.page)}
+                >
+                  <a href="#" className="page-link">
+                    {page.page}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Col>
+        );
+      },
       paginationTotalRenderer: (start, to, total) => {
         return this.state.portalReady
           ? ReactDOM.createPortal(
@@ -158,17 +176,7 @@ export default class StockTable extends React.Component {
       },
       {
         sort: true,
-        dataField: "name",
-        filter: customFilter({
-          type: FILTER_TYPES.MULTISELECT
-        }),
-        filterRenderer: (onFilter, column) =>
-          this.getCustomFilter(
-            onFilter,
-            column,
-            filteredData.length ? filteredData : this.props.products
-          ),
-        text: "Product Name"
+        dataField: "name"
       },
       {
         sort: true,
