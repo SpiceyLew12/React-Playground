@@ -29,13 +29,20 @@ export default class StockTable extends React.Component {
 
   componentDidMount(prevProps) {
     this.setState({ portalReady: true });
+    filteredData = this.props.products;
   }
 
   getCustomFilter = (onFilter, column, products) => {
     let ref = React.createRef();
     refs[column.dataField] = ref;
     let options = [...new Set(products.map((field) => field[column.dataField]))]
-      .sort()
+      .sort((a, b) => {
+        if (typeof a === "number") {
+          return a - b;
+        } else {
+          return a < b ? -1 : 1;
+        }
+      })
       .map((entry) => ({
         label: entry,
         value: entry
@@ -86,18 +93,15 @@ export default class StockTable extends React.Component {
         backgroundColor: "white"
       })
     };
-    let size = currSizePerPage;
-    let selectedSize = { label: size, value: size };
     return (
       <Row>
         <Col md={4}>
           <Select
+            defaultValue={{ label: 5, value: 5 }}
             isSearchable={false}
-            value={selectedSize}
             styles={customStyles}
             onChange={(selected) => {
               onSizePerPageChange(selected.value);
-              size = selected.value;
             }}
             theme={(theme) => ({
               ...theme,
@@ -107,7 +111,8 @@ export default class StockTable extends React.Component {
             options={[
               { label: 5, value: 5 },
               { label: 10, value: 10 },
-              { label: 15, value: 15 }
+              { label: 15, value: 15 },
+              { label: "All", value: this.props.products.length }
             ]}
           />
         </Col>
@@ -120,6 +125,33 @@ export default class StockTable extends React.Component {
     );
   };
 
+  renderPageList = (options) => (
+    <Col className="react-bootstrap-table-pagination-list" md={6}>
+      <ul className="pagination react-bootstrap-table-page-btns-ul float-end">
+        {options.pages.map((page) => (
+          <li
+            className={`${page.active ? "active " : ""}page-item`}
+            onClick={() => options.onPageChange(page.page)}
+          >
+            <a href="#" className="page-link">
+              {page.page}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </Col>
+  );
+
+  renderPaginationTotal = (start, to, total) =>
+    this.state.portalReady
+      ? ReactDOM.createPortal(
+          <span>
+            {start} to {to} of {total}
+          </span>,
+          this.portal.current
+        )
+      : null;
+
   render() {
     const rowEvents = {
       onClick: (e, row, index) => this.setState({ activeRow: row })
@@ -129,34 +161,8 @@ export default class StockTable extends React.Component {
       firstPageText: "First",
       lastPageText: "Last",
       showTotal: true,
-      pageListRenderer: (options) => {
-        return (
-          <Col className="react-bootstrap-table-pagination-list" md={6}>
-            <ul className="pagination react-bootstrap-table-page-btns-ul float-end">
-              {options.pages.map((page) => (
-                <li
-                  className={`${page.active ? "active " : ""}page-item`}
-                  onClick={() => options.onPageChange(page.page)}
-                >
-                  <a href="#" className="page-link">
-                    {page.page}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </Col>
-        );
-      },
-      paginationTotalRenderer: (start, to, total) => {
-        return this.state.portalReady
-          ? ReactDOM.createPortal(
-              <span>
-                {start} to {to} of {total}
-              </span>,
-              this.portal.current
-            )
-          : null;
-      },
+      pageListRenderer: this.renderPageList,
+      paginationTotalRenderer: this.renderPaginationTotal,
       sizePerPageRenderer: this.renderDropDown
     });
     const rowStyle = (row) => {
@@ -176,7 +182,8 @@ export default class StockTable extends React.Component {
       },
       {
         sort: true,
-        dataField: "name"
+        dataField: "name",
+        text: "Product Name"
       },
       {
         sort: true,
@@ -185,11 +192,7 @@ export default class StockTable extends React.Component {
           type: FILTER_TYPES.MULTISELECT
         }),
         filterRenderer: (onFilter, column) =>
-          this.getCustomFilter(
-            onFilter,
-            column,
-            filteredData.length ? filteredData : this.props.products
-          ),
+          this.getCustomFilter(onFilter, column, this.props.products),
         text: "Company"
       },
       {
@@ -200,11 +203,7 @@ export default class StockTable extends React.Component {
           comparator: Comparator.EQ
         }),
         filterRenderer: (onFilter, column) =>
-          this.getCustomFilter(
-            onFilter,
-            column,
-            filteredData.length ? filteredData : this.props.products
-          ),
+          this.getCustomFilter(onFilter, column, this.props.products),
         text: "Quantity"
       },
       {
@@ -214,11 +213,7 @@ export default class StockTable extends React.Component {
           type: FILTER_TYPES.MULTISELECT
         }),
         filterRenderer: (onFilter, column) =>
-          this.getCustomFilter(
-            onFilter,
-            column,
-            filteredData.length ? filteredData : this.props.products
-          ),
+          this.getCustomFilter(onFilter, column, this.props.products),
         text: "In Stock"
       }
     ];
