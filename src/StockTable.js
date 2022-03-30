@@ -7,15 +7,14 @@ import React from "react";
 import ReactDOM from "react-dom";
 import BootstrapTable from "react-bootstrap-table-next";
 import Select from "react-select";
-import { Button, ButtonGroup, Col, Row } from "react-bootstrap";
+import { Button, Col, FormControl, Row } from "react-bootstrap";
 import filterFactory, {
   Comparator,
   customFilter,
   FILTER_TYPES
 } from "react-bootstrap-table2-filter";
 
-let refs = {};
-let filteredData = [];
+let filters = [];
 
 export default class StockTable extends React.Component {
   constructor(props) {
@@ -29,12 +28,41 @@ export default class StockTable extends React.Component {
 
   componentDidMount(prevProps) {
     this.setState({ portalReady: true });
-    filteredData = this.props.products;
   }
+
+  getTextFilter = (onFilter, column) => {
+    let ref = React.createRef();
+    let clearFilter = () => {
+      onFilter();
+      if (ref.current) {
+        ref.current.value = "";
+      }
+    };
+    filters.push(clearFilter);
+    return this.state.portalReady
+      ? ReactDOM.createPortal(
+          <Col style={{ zIndex: "100" }} onClick={(e) => e.stopPropagation()}>
+            <FormControl
+              ref={ref}
+              placeholder={column.text}
+              className="filter"
+              onChange={(event) => onFilter(event.target.value)}
+            />
+          </Col>,
+          document.getElementById("filter-container")
+        )
+      : null;
+  };
 
   getCustomFilter = (onFilter, column, products) => {
     let ref = React.createRef();
-    refs[column.dataField] = ref;
+    let clearFilter = () => {
+      onFilter();
+      if (ref.current) {
+        ref.current.clearValue();
+      }
+    };
+    filters.push(clearFilter);
     let options = [...new Set(products.map((field) => field[column.dataField]))]
       .sort((a, b) => {
         if (typeof a === "number") {
@@ -160,6 +188,7 @@ export default class StockTable extends React.Component {
       sizePerPage: 5,
       firstPageText: "First",
       lastPageText: "Last",
+      alwaysShowAllBtns: true,
       showTotal: true,
       pageListRenderer: this.renderPageList,
       paginationTotalRenderer: this.renderPaginationTotal,
@@ -183,7 +212,12 @@ export default class StockTable extends React.Component {
       {
         sort: true,
         dataField: "name",
-        text: "Product Name"
+        text: "Product Name",
+        filter: customFilter({
+          type: FILTER_TYPES.TEXT
+        }),
+        filterRenderer: (onFilter, column) =>
+          this.getTextFilter(onFilter, column)
       },
       {
         sort: true,
@@ -218,8 +252,6 @@ export default class StockTable extends React.Component {
       }
     ];
 
-    const afterFilter = (newData, filter) => (filteredData = newData);
-
     return (
       <div>
         <Row style={{ margin: "5px" }}>
@@ -236,9 +268,7 @@ export default class StockTable extends React.Component {
               hidden={!this.state.filter}
               className="btn btn-info text-white w-100 shadow-none"
               onClick={() => {
-                for (let key in refs) {
-                  refs[key].current.clearValue();
-                }
+                filters.forEach((filter) => filter());
               }}
             >
               Clear Filter
@@ -256,7 +286,7 @@ export default class StockTable extends React.Component {
           rowEvents={rowEvents}
           rowStyle={rowStyle}
           pagination={pagination}
-          filter={filterFactory({ afterFilter })}
+          filter={filterFactory()}
         />
       </div>
     );
