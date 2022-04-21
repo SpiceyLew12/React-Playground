@@ -13,6 +13,8 @@ import filterFactory, {
   customFilter,
   FILTER_TYPES
 } from "react-bootstrap-table2-filter";
+import { contextMenu, Item, Menu, Separator, Submenu } from "react-contexify";
+import "react-contexify/dist/ReactContexify.css";
 
 let filters = [];
 
@@ -158,6 +160,7 @@ export default class StockTable extends React.Component {
       <ul className="pagination react-bootstrap-table-page-btns-ul float-end">
         {options.pages.map((page) => (
           <li
+            key={page.page}
             className={`${page.active ? "active " : ""}page-item`}
             onClick={() => options.onPageChange(page.page)}
           >
@@ -180,9 +183,22 @@ export default class StockTable extends React.Component {
         )
       : null;
 
+  showContext = (event, row) => {
+    this.setState({ activeRow: row });
+    event.preventDefault();
+    contextMenu.show({
+      id: "context-menu",
+      event: event
+    });
+  };
+
   render() {
+    let { activeRow } = this.state;
     const rowEvents = {
-      onClick: (e, row, index) => this.setState({ activeRow: row })
+      onClick: (e, row, index) => this.setState({ activeRow: row }),
+      onContextMenu: (e, row, index) => {
+        this.showContext(e, row);
+      }
     };
     const pagination = paginationFactory({
       sizePerPage: 5,
@@ -288,6 +304,21 @@ export default class StockTable extends React.Component {
           pagination={pagination}
           filter={filterFactory()}
         />
+        <Menu id="context-menu">
+          {activeRow && (
+            <>
+              <div className="text-center">{activeRow.name}</div>
+              <Separator />
+              {["Google", "Apple"].includes(activeRow.company) && (
+                <Submenu label="Contact" arrow=">">
+                  <Item>Phone</Item>
+                  <Item>Email</Item>
+                </Submenu>
+              )}
+              <Item disabled={activeRow.isInStock !== "yes"}>Add to Cart</Item>
+            </>
+          )}
+        </Menu>
       </div>
     );
   }
